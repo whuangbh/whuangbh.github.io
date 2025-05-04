@@ -18,7 +18,16 @@ function generateSixDigitRandomNumber() {
 function initializePeer() {
   if (peer != null) return
 
-  peer = new Peer(deviceId.value.toString())
+  peer = new Peer(deviceId.value.toString(), {
+    debug: 3,
+    config: {
+      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+    },
+  })
+
+  peer.on('open', function (id) {
+    console.log('My peer ID is: ' + id)
+  })
 
   peer.on('connection', (peerConnection) => {
     conn = peerConnection
@@ -57,8 +66,6 @@ function connectToPeer() {
     // Send messages
     conn.send('Hello!')
   })
-
-  console.log('haha')
 }
 
 function showErrorMsg(msg) {
