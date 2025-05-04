@@ -9,7 +9,7 @@ const errMsg = ref('')
 const isDisplayErrorMsg = computed(() => errMsg.value)
 
 let conn = null
-const peer = new Peer()
+const peer = new Peer({ debug: 3 })
 peer.on('open', function (id) {
   console.log('My peer ID is: ' + id)
   deviceId.value = id
