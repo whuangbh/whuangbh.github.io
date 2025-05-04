@@ -16,14 +16,15 @@ function generateSixDigitRandomNumber() {
 }
 
 function initializePeer() {
-  if (peer != null) return
+  // if (peer != null) return
 
-  peer = new Peer({
-    debug: 3,
-    config: {
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
-    },
-  })
+  peer = new Peer()
+  //   {
+  //   debug: 3,
+  //   config: {
+  //     iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+  //   },
+  // }
 
   peer.on('open', function (id) {
     console.log('My peer ID is: ' + id)
