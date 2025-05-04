@@ -1,97 +1,117 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { Peer } from 'https://esm.sh/peerjs@1.5.4?bundle-deps'
 
-const bluetoothSupported = ref(false)
-const errorMessage = ref('')
+import { computed, onMounted, ref } from 'vue'
 
-const targetDevice = ref()
+const deviceId = ref(generateSixDigitRandomNumber())
+const peerDeviceId = ref('')
+const errMsg = ref('')
+const isDisplayErrorMsg = computed(() => errMsg.value)
 
-onMounted(() => {
-  if ('bluetooth' in navigator) {
-    bluetoothSupported.value = true
-  } else {
-    bluetoothSupported.value = false
-    errorMessage.value = 'Web Bluetooth API is not supported in this browser.'
-  }
-})
+let peer = null
+let conn = null
 
-async function handleButtonClick() {
-  console.log('clicked!')
+function generateSixDigitRandomNumber() {
+  return Math.floor(100000 + Math.random() * 900000)
+}
 
-  if (!bluetoothSupported.value) {
+function initializePeer() {
+  if (peer != null) return
+
+  peer = new Peer(deviceId.value.toString())
+
+  peer.on('connection', (peerConnection) => {
+    conn = peerConnection
+
+    conn.on('open', function () {
+      // Receive messages
+      conn.on('data', function (data) {
+        console.log('Received', data)
+      })
+
+      // Send messages
+      conn.send('Hello!')
+    })
+  })
+}
+
+function connectToPeer() {
+  if (peer == null) {
+    showErrorMsg('Fail to initialize peer!')
     return
   }
 
-  try {
-    console.log('Requesting Bluetooth Device...')
-    const device = await navigator.bluetooth.requestDevice({
-      acceptAllDevices: true, // Be cautious with this in production
-      // optionalServices: ['your-service-uuid'] // Specify services you need
-    })
-    console.log('Device found:', device)
-    alert(`Found device: ${device.name || 'Unnamed Device'}`)
-    // You can now proceed to connect to the device's GATT server
-    // and interact with its services and characteristics.
-  } catch (error) {
-    console.error('Error requesting Bluetooth device:', error)
-    errorMessage.value = `Error: ${error.message}`
+  if (!peerDeviceId.value || peerDeviceId.value.toString().length !== 6) {
+    showErrorMsg('Please input a valid device id!')
+    return
   }
+
+  conn = peer.connect(peerDeviceId.value.toString())
+
+  conn.on('open', function () {
+    // Receive messages
+    conn.on('data', function (data) {
+      console.log('Received', data)
+    })
+
+    // Send messages
+    conn.send('Hello!')
+  })
+
+  console.log('haha')
 }
 
-async function test() {
-  navigator.bluetooth
-    .getDevices()
-    .then((devices) => {
-      console.log('Previously permitted devices:', devices)
-      devices.forEach((device) => {
-        console.dir(device)
-      })
-    })
-    .catch((error) => {
-      console.error('Error getting previously permitted devices:', error)
-    })
+function showErrorMsg(msg) {
+  errMsg.value = msg
 }
+
+function dismissErrMsg() {
+  errMsg.value = ''
+}
+
+onMounted(() => {
+  initializePeer()
+})
 </script>
 
 <template>
   <div class="mt-2 container">
     <div class="row justify-content-center">
       <div class="fs-3 col-6">
-        <template v-if="!bluetoothSupported">
-          <span class="me-2 fw-medium">1. Bluetooth is not support by your device or browser</span>
-          <img class="align-bottom" src="../images/cross.svg" />
-        </template>
-        <template v-else>
-          <span class="me-2 fw-medium">1. Bluetooth is supported</span>
-          <img class="align-bottom" src="../images/check.svg" />
-        </template>
+        Device Id: <span class="text-primary fw-bold">{{ deviceId }} </span>
       </div>
     </div>
-
     <div class="row justify-content-center">
       <div class="fs-3 col-6">
-        <span class="me-2 fw-medium">2. Pair a device to share</span>
-        <img v-if="!targetDevice" class="align-bottom" src="../images/cross.svg" />
-        <img v-else class="align-bottom" src="../images/check.svg" />
+        <div class="row align-items-center">
+          <div class="col-auto">Connect to other device:</div>
+          <div class="col-auto">
+            <form class="input-group">
+              <input
+                v-model="peerDeviceId"
+                required
+                type="number"
+                class="form-control"
+                placeholder="Device Id"
+                maxlength="6"
+                minlength="6"
+              />
+              <button @click="connectToPeer" class="btn btn-primary" type="button">Connect</button>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
-
-    <div class="row justify-content-center mt-2">
+    <div class="row justify-content-center my-2">
       <div class="col-6">
-        <button
-          @click="handleButtonClick"
-          :disabled="!bluetoothSupported"
-          type="button"
-          class="btn btn-primary ms-4 me-3"
-        >
-          Pair
-        </button>
-        <span class="fs-5 text-secondary fst-italic">No device is selected! </span>
+        <div v-show="isDisplayErrorMsg" class="alert alert-danger alert-dismissible" role="alert">
+          <span>{{ errMsg }}</span>
+          <button @click="dismissErrMsg" type="button" class="btn-close"></button>
+        </div>
+        <div>hahah</div>
       </div>
     </div>
   </div>
-
-  <button @click="test">Check</button>
 </template>
 
 <style scoped></style>
