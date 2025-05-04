@@ -18,7 +18,7 @@ function generateSixDigitRandomNumber() {
 function initializePeer() {
   if (peer != null) return
 
-  peer = new Peer(deviceId.value.toString(), {
+  peer = new Peer({
     debug: 3,
     config: {
       iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
@@ -27,6 +27,7 @@ function initializePeer() {
 
   peer.on('open', function (id) {
     console.log('My peer ID is: ' + id)
+    deviceId.value = id
   })
 
   peer.on('connection', (peerConnection) => {
@@ -45,15 +46,15 @@ function initializePeer() {
 }
 
 function connectToPeer() {
-  if (peer == null) {
-    showErrorMsg('Fail to initialize peer!')
-    return
-  }
+  // if (peer == null) {
+  //   showErrorMsg('Fail to initialize peer!')
+  //   return
+  // }
 
-  if (!peerDeviceId.value || peerDeviceId.value.toString().length !== 6) {
-    showErrorMsg('Please input a valid device id!')
-    return
-  }
+  // if (!peerDeviceId.value || peerDeviceId.value.toString().length !== 6) {
+  //   showErrorMsg('Please input a valid device id!')
+  //   return
+  // }
 
   conn = peer.connect(peerDeviceId.value.toString())
 
@@ -115,7 +116,6 @@ onMounted(() => {
           <span>{{ errMsg }}</span>
           <button @click="dismissErrMsg" type="button" class="btn-close"></button>
         </div>
-        <div>hahah</div>
       </div>
     </div>
   </div>
