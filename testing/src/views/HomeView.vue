@@ -17,14 +17,8 @@ peer.on('open', function (id) {
 peer.on('connection', (incomingConnection) => {
   conn = incomingConnection
 
-  conn.on('open', function () {
-    // Receive messages
-    conn.on('data', function (data) {
-      console.log('Received', data)
-    })
-
-    // Send messages
-    conn.send('Hello!')
+  conn.on('data', function (data) {
+    console.log('Received', data)
   })
 })
 
@@ -33,15 +27,7 @@ function initializePeer() {}
 function connectToPeer() {
   conn = peer.connect(peerDeviceId.value)
 
-  conn.on('open', function () {
-    // Receive messages
-    conn.on('data', function (data) {
-      console.log('Received', data)
-    })
-
-    // Send messages
-    conn.send('Hello!')
-  })
+  conn.send('Hello!')
 }
 
 function showErrorMsg(msg) {
