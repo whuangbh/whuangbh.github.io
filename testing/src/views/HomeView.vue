@@ -3,7 +3,7 @@ import { Peer } from 'https://esm.sh/peerjs@1.5.4?bundle-deps'
 
 import { computed, onMounted, ref } from 'vue'
 
-const deviceId = ref(generateSixDigitRandomNumber())
+const deviceId = ref('') // Initialize as empty
 const peerDeviceId = ref('')
 const errMsg = ref('')
 const isDisplayErrorMsg = computed(() => errMsg.value)
@@ -11,62 +11,68 @@ const isDisplayErrorMsg = computed(() => errMsg.value)
 let peer = null
 let conn = null
 
-function generateSixDigitRandomNumber() {
-  return Math.floor(100000 + Math.random() * 900000)
-}
-
 function initializePeer() {
-  // if (peer != null) return
+  if (peer != null) return
 
-  peer = new Peer()
-  //   {
-  //   debug: 3,
-  //   config: {
-  //     iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
-  //   },
-  // }
+  peer = new Peer({
+    debug: 3,
+    config: {
+      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+    },
+  })
 
   peer.on('open', function (id) {
     console.log('My peer ID is: ' + id)
-    deviceId.value = id
+    deviceId.value = id // Set deviceId when the server assigns it
   })
 
   peer.on('connection', (peerConnection) => {
     conn = peerConnection
 
     conn.on('open', function () {
-      // Receive messages
+      console.log('Data channel opened by remote peer.')
       conn.on('data', function (data) {
         console.log('Received', data)
       })
-
-      // Send messages
-      conn.send('Hello!')
+      conn.send('Hello from receiver!')
     })
+
+    conn.on('error', function (err) {
+      console.error('Connection error from remote:', err)
+      showErrorMsg(`Connection error: ${err}`)
+    })
+  })
+
+  peer.on('error', function (err) {
+    console.error('PeerJS error:', err)
+    showErrorMsg(`PeerJS error: ${err}`)
   })
 }
 
 function connectToPeer() {
-  // if (peer == null) {
-  //   showErrorMsg('Fail to initialize peer!')
-  //   return
-  // }
+  if (!peer) {
+    showErrorMsg('Peer object not initialized!')
+    return
+  }
 
-  // if (!peerDeviceId.value || peerDeviceId.value.toString().length !== 6) {
-  //   showErrorMsg('Please input a valid device id!')
-  //   return
-  // }
+  if (!peerDeviceId.value) {
+    showErrorMsg('Please input the peer device ID!')
+    return
+  }
 
   conn = peer.connect(peerDeviceId.value.toString())
 
   conn.on('open', function () {
-    // Receive messages
+    console.log('Data channel opened with peer: ' + peerDeviceId.value)
     conn.on('data', function (data) {
       console.log('Received', data)
     })
+    conn.send('Hello from sender!')
+  })
 
-    // Send messages
-    conn.send('Hello!')
+  conn.on('error', function (err) {
+    console.error('Connection error to remote:', err)
+    showErrorMsg(`Connection error: ${err}`)
   })
 }
 
@@ -99,11 +105,9 @@ onMounted(() => {
               <input
                 v-model="peerDeviceId"
                 required
-                type="number"
+                type="text"
                 class="form-control"
-                placeholder="Device Id"
-                maxlength="6"
-                minlength="6"
+                placeholder="Peer ID"
               />
               <button @click="connectToPeer" class="btn btn-primary" type="button">Connect</button>
             </form>
