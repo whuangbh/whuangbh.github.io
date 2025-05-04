@@ -8,34 +8,25 @@ const peerDeviceId = ref('')
 const errMsg = ref('')
 const isDisplayErrorMsg = computed(() => errMsg.value)
 
-let conn = null
 const peer = new Peer({ debug: 3 })
 peer.on('open', function (id) {
   console.log('My peer ID is: ' + id)
   deviceId.value = id
 })
 peer.on('connection', (incomingConnection) => {
-  conn = incomingConnection
-
-  conn.on('data', function (data) {
-    console.log('Received', data)
-  })
-
-  conn.on('open', function () {
-    // Receive messages
-    conn.on('data', function (data) {
+  incomingConnection.on('open', function () {
+    incomingConnection.on('data', function (data) {
       console.log('Received', data)
     })
 
-    // Send messages
-    conn.send({ str: 'Hello!' })
+    incomingConnection.send('Hello from receiver!')
   })
 })
 
 function initializePeer() {}
 
 function connectToPeer() {
-  conn = peer.connect(peerDeviceId.value)
+  const conn = peer.connect(peerDeviceId.value)
 
   conn.on('open', function () {
     // Receive messages
