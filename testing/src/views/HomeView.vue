@@ -8,75 +8,39 @@ const peerDeviceId = ref('')
 const errMsg = ref('')
 const isDisplayErrorMsg = computed(() => errMsg.value)
 
-let peer = null
 let conn = null
-
-function initializePeer() {
-  if (peer != null) return
-
-  peer = new Peer({
-    debug: 3,
-    config: {
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
-    },
-  })
-
-  peer.on('open', function (id) {
-    console.log('My peer ID is: ' + id)
-    deviceId.value = id // Set deviceId when the server assigns it
-  })
-
-  peer.on('connection', (peerConnection) => {
-    conn = peerConnection
-
-    conn.on('open', function () {
-      console.log('Data channel opened by remote peer.')
-      // conn.on('data', function (data) {
-      //   console.log('Received', data)
-      // })
-      // conn.send('Hello from receiver!')
-    })
-
-    conn.on('data', function (data) {
-      console.log('Received', data)
-    })
-
-    conn.on('error', function (err) {
-      console.error('Connection error from remote:', err)
-      showErrorMsg(`Connection error: ${err}`)
-    })
-  })
-
-  peer.on('error', function (err) {
-    console.error('PeerJS error:', err)
-    showErrorMsg(`PeerJS error: ${err}`)
-  })
-}
-
-function connectToPeer() {
-  if (!peer) {
-    showErrorMsg('Peer object not initialized!')
-    return
-  }
-
-  if (!peerDeviceId.value) {
-    showErrorMsg('Please input the peer device ID!')
-    return
-  }
-
-  conn = peer.connect(peerDeviceId.value.toString())
+const peer = new Peer()
+peer.on('open', function (id) {
+  console.log('My peer ID is: ' + id)
+  deviceId.value = id
+})
+peer.on('connection', (incomingConnection) => {
+  conn = incomingConnection
 
   conn.on('open', function () {
-    console.log('Data channel opened with peer: ' + peerDeviceId.value)
+    // Receive messages
     conn.on('data', function (data) {
       console.log('Received', data)
     })
-    conn.send('Hello from sender!')
-  })
 
-  conn.on('error', function (err) {
-    console.error('Connection error to remote:', err)
-    showErrorMsg(`Connection error: ${err}`)
+    // Send messages
+    conn.send('Hello!')
+  })
+})
+
+function initializePeer() {}
+
+function connectToPeer() {
+  conn = peer.connect(peerDeviceId.value)
+
+  conn.on('open', function () {
+    // Receive messages
+    conn.on('data', function (data) {
+      console.log('Received', data)
+    })
+
+    // Send messages
+    conn.send('Hello!')
   })
 }
 
