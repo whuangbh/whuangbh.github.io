@@ -31,10 +31,14 @@ function initializePeer() {
 
     conn.on('open', function () {
       console.log('Data channel opened by remote peer.')
-      conn.on('data', function (data) {
-        console.log('Received', data)
-      })
-      conn.send('Hello from receiver!')
+      // conn.on('data', function (data) {
+      //   console.log('Received', data)
+      // })
+      // conn.send('Hello from receiver!')
+    })
+
+    conn.on('data', function (data) {
+      console.log('Received', data)
     })
 
     conn.on('error', function (err) {
