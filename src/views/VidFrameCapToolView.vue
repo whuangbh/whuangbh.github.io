@@ -384,7 +384,7 @@ const captureFrameAtTime = (video, timestamp, baseName, index) => {
             Captured Frames ({{ capturedFrames.length }})
           </h5>
           <div class="table-responsive">
-            <table class="table table-striped table-sm align-middle">
+            <table class="table table-striped table-sm align-middle text-center">
               <thead>
                 <tr>
                   <th>#</th>
