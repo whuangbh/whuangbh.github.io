@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import VidFrameCapToolView from '../views/VidFrameCapToolView.vue'
 import HomeView from '../views/HomeView.vue'
 
