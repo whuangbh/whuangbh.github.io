@@ -321,76 +321,75 @@ const captureFrameAtTime = (
           <i class="bi bi-camera-fill ms-2"></i>
         </h4>
 
-        <div v-if="videoUrl" class="card mb-4 p-3 shadow-sm">
-          <h5 class="card-title text-success">Video Status</h5>
-          <ul class="list-unstyled mb-0 small">
-            <li><strong>File Name:</strong> {{ videoInfo.name }}</li>
-            <li><strong>Resolution:</strong> {{ videoInfo.resolution }}</li>
-            <li><strong>Format/MIME:</strong> {{ videoInfo.format }}</li>
-            <li><strong>Duration:</strong> {{ formatTime(videoInfo.duration) }}</li>
-            <li>
-              <strong>Current Time:</strong>
-              <span class="ms-1 text-danger fw-bold fs-5">{{ formatTime(currentTime) }}</span>
-            </li>
-          </ul>
+        <div v-if="!videoUrl" class="card mb-3">
+          <div class="text-center text-muted lead m-5">Load a video on the left to begin.</div>
         </div>
 
-        <div v-else class="card mb-3">
-          <div class="text-center text-muted lead m-5">
-            <i class="bi bi-upload me-2"></i> Load a video on the left to begin.
-          </div>
-        </div>
-
-        <div v-if="videoUrl" class="card mb-4 p-4 shadow">
-          <h5 class="card-title text-success mb-3">Capture Settings</h5>
-
-          <div class="row g-3">
-            <div class="col-md-6">
-              <label for="captureRange" class="form-label">Capture Range</label>
-              <h4 class="text-primary fw-bold mb-1">{{ captureRange }}s</h4>
-              <input
-                type="range"
-                id="captureRange"
-                class="form-range"
-                v-model.number="captureRange"
-                min="1.0"
-                max="10.0"
-                step="0.25"
-              />
-              <div class="form-text">Captures the following {{ captureRange }}s</div>
-            </div>
-
-            <div class="col-md-6">
-              <label for="captureStep" class="form-label">Step Size</label>
-              <h4 class="text-primary fw-bold mb-1">{{ captureStep.toFixed(2) }}s</h4>
-              <input
-                type="range"
-                id="captureStep"
-                class="form-range"
-                v-model.number="captureStep"
-                min="0.1"
-                max="0.5"
-                step="0.05"
-              />
-              <div class="form-text">Captures every {{ captureStep.toFixed(2) }}s.</div>
-            </div>
+        <template v-else>
+          <div class="card mb-4 p-3 shadow">
+            <h5 class="card-title text-success">Video Status</h5>
+            <ul class="list-unstyled mb-0 small">
+              <li><strong>File Name:</strong> {{ videoInfo.name }}</li>
+              <li><strong>Resolution:</strong> {{ videoInfo.resolution }}</li>
+              <li><strong>Format/MIME:</strong> {{ videoInfo.format }}</li>
+              <li><strong>Duration:</strong> {{ formatTime(videoInfo.duration) }}</li>
+              <li>
+                <strong>Current Time:</strong>
+                <span class="ms-1 text-danger fw-bold fs-5">{{ formatTime(currentTime) }}</span>
+              </li>
+            </ul>
           </div>
 
-          <button
-            @click="captureFrames"
-            class="btn btn-success btn-lg mt-3"
-            :disabled="!videoUrl || videoPlayer?.paused === false || isCapturing"
-          >
-            <span
-              v-if="isCapturing"
-              class="spinner-border spinner-border-sm me-2"
-              role="status"
-              aria-hidden="true"
-            ></span>
-            <i v-else class="bi bi-camera-fill me-1"></i>
-            {{ isCapturing ? 'Capturing Frames...' : 'Capture' }}
-          </button>
-        </div>
+          <div class="card mb-4 p-3 shadow">
+            <h5 class="card-title text-success">Capture Settings</h5>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="captureRange" class="form-label">Capture Range</label>
+                <h4 class="text-primary fw-bold mb-1">{{ captureRange }}s</h4>
+                <input
+                  type="range"
+                  id="captureRange"
+                  class="form-range"
+                  v-model.number="captureRange"
+                  min="1.0"
+                  max="10.0"
+                  step="0.25"
+                />
+                <div class="form-text">Captures the following {{ captureRange }}s</div>
+              </div>
+
+              <div class="col-md-6">
+                <label for="captureStep" class="form-label">Step Size</label>
+                <h4 class="text-primary fw-bold mb-1">{{ captureStep.toFixed(2) }}s</h4>
+                <input
+                  type="range"
+                  id="captureStep"
+                  class="form-range"
+                  v-model.number="captureStep"
+                  min="0.1"
+                  max="0.5"
+                  step="0.05"
+                />
+                <div class="form-text">Captures every {{ captureStep.toFixed(2) }}s.</div>
+              </div>
+            </div>
+
+            <button
+              @click="captureFrames"
+              class="btn btn-success btn-lg mt-3"
+              :disabled="!videoUrl || videoPlayer?.paused === false || isCapturing"
+            >
+              <span
+                v-if="isCapturing"
+                class="spinner-border spinner-border-sm me-2"
+                role="status"
+                aria-hidden="true"
+              ></span>
+              <i v-else class="bi bi-camera-fill me-1"></i>
+              {{ isCapturing ? 'Capturing Frames...' : 'Capture' }}
+            </button>
+          </div>
+        </template>
       </div>
       <div class="col-12 mb-5">
         <h4 class="mb-3 text-info d-flex align-items-center">
@@ -398,7 +397,13 @@ const captureFrameAtTime = (
           <i class="bi bi-pass-fill ms-2"></i>
         </h4>
 
-        <div v-if="capturedFrames.length > 0" class="card p-3 shadow mb-5">
+        <div v-if="capturedFrames.length === 0" class="card mb-3">
+          <div class="text-center text-muted lead m-4">
+            Results will be shown here after capturing.
+          </div>
+        </div>
+
+        <div v-else class="card p-3 shadow mb-5">
           <div class="container-fluid">
             <h5 class="card-title text-info">Captured Frames ({{ capturedFrames.length }})</h5>
             <div class="row gy-3 mb-2">
