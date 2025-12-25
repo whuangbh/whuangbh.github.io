@@ -104,7 +104,7 @@ const dragLeave = () => {
 }
 
 const handleScroll = () => {
-  showBackToTop.value = window.scrollY > 100
+  showBackToTop.value = window.scrollY > 300
 }
 
 const scrollToTop = () => {
@@ -150,7 +150,7 @@ const captureFrames = async () => {
 
   let promiseChain = Promise.resolve()
 
-  console.dir(timesToCapture)
+  // console.dir(timesToCapture)
   // console.dir(uniqueSortedTimes)
 
   timesToCapture.forEach((timestamp, i) => {
@@ -335,10 +335,10 @@ const captureFrameAtTime = (
           </ul>
         </div>
 
-        <div v-else class="card p-4 h-100 d-flex justify-content-center align-items-center">
-          <p class="text-muted lead">
+        <div v-else class="card mb-3">
+          <div class="text-center text-muted lead m-5">
             <i class="bi bi-upload me-2"></i> Load a video on the left to begin.
-          </p>
+          </div>
         </div>
 
         <div v-if="videoUrl" class="card mb-4 p-4 shadow">
@@ -391,40 +391,40 @@ const captureFrameAtTime = (
             {{ isCapturing ? 'Capturing Frames...' : 'Capture' }}
           </button>
         </div>
+      </div>
+      <div class="col-12 mb-5">
+        <h4 class="mb-3 text-info d-flex align-items-center">
+          Frame Capture Results
+          <i class="bi bi-pass-fill ms-2"></i>
+        </h4>
 
-        <div v-if="capturedFrames.length > 0" class="card p-3 shadow">
-          <h5 class="card-title text-success mb-3">
-            Captured Frames ({{ capturedFrames.length }})
-          </h5>
-          <div class="table-responsive">
-            <table class="table table-striped table-sm align-middle text-center">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Timestamp</th>
-                  <th>Frame</th>
-                  <th>Download</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(frame, index) in capturedFrames" :key="index">
-                  <td>{{ index + 1 }}</td>
-                  <td>{{ formatTime(frame.timestamp) }}</td>
-                  <td>
-                    <img :src="frame.dataUrl" class="img-fluid" />
-                  </td>
-                  <td>
+        <div v-if="capturedFrames.length > 0" class="card p-3 shadow mb-5">
+          <div class="container-fluid">
+            <h5 class="card-title text-info">Captured Frames ({{ capturedFrames.length }})</h5>
+            <div class="row gy-3 mb-2">
+              <div
+                class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2"
+                v-for="(frame, index) in capturedFrames"
+                :key="index"
+              >
+                <div class="card text-center">
+                  <img :src="frame.dataUrl" class="card-img-top" />
+                  <div class="card-body">
+                    <h5 class="card-title d-flex justify-content-between">
+                      <div>#{{ index + 1 }}</div>
+                      <div>{{ formatTime(frame.timestamp) }}</div>
+                    </h5>
                     <a
                       :href="frame.dataUrl"
                       :download="frame.filename"
-                      class="btn btn-sm btn-primary"
+                      class="btn btn-sm btn-primary px-4"
                     >
                       <i class="bi bi-download"></i>
                     </a>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -433,7 +433,7 @@ const captureFrameAtTime = (
       <button
         v-if="showBackToTop"
         @click="scrollToTop"
-        class="btn btn-primary back-to-top-btn shadow"
+        class="btn btn-warning back-to-top-btn shadow"
       >
         <i class="bi bi-arrow-up-short fs-4"></i>
       </button>
@@ -458,8 +458,9 @@ const captureFrameAtTime = (
 
 .back-to-top-btn {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
   border-radius: 50%;
   width: 50px;
   height: 50px;
