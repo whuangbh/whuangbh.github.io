@@ -104,12 +104,12 @@ const dragLeave = () => {
 }
 
 const handleScroll = () => {
-  showBackToTop.value = window.scrollY > 300
+  showBackToTop.value = window.scrollY > 290
 }
 
 const scrollToTop = () => {
   window.scrollTo({
-    top: 0,
+    top: 290,
     behavior: 'smooth',
   })
 }
