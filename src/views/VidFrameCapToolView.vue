@@ -1,10 +1,10 @@
-<script setup>
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+<script setup lang="ts">
+import { ref, watch, onMounted, onUnmounted, useTemplateRef } from 'vue'
 
-const videoUrl = ref(null)
+const videoUrl = ref<string | null>(null)
 const isDragOver = ref(false)
-const fileInput = ref(null)
-const videoPlayer = ref(null)
+const fileInput = useTemplateRef('file-input')
+const videoPlayer = useTemplateRef('video-player')
 
 const videoInfo = ref({
   name: '',
@@ -15,12 +15,19 @@ const videoInfo = ref({
 
 const captureRange = ref(2.0)
 const captureStep = ref(0.2)
-const capturedFrames = ref([])
 const currentTime = ref(0)
 const isCapturing = ref(false)
 const showBackToTop = ref(false)
 
-const formatTime = (time) => {
+interface CapturedFrame {
+  timestamp: number
+  dataUrl: string
+  filename: string
+}
+
+const capturedFrames = ref<CapturedFrame[]>([])
+
+const formatTime = (time: number) => {
   if (isNaN(time)) return '00:00.000'
   const seconds = Math.floor(time)
   const milliseconds = (time - seconds).toFixed(3).substring(2)
@@ -46,7 +53,7 @@ watch(videoPlayer, (player) => {
   }
 })
 
-const processVideoFile = (file) => {
+const processVideoFile = (file: File) => {
   if (videoUrl.value) {
     URL.revokeObjectURL(videoUrl.value)
   }
@@ -68,19 +75,21 @@ const processVideoFile = (file) => {
 }
 
 const triggerFileInput = () => {
-  fileInput.value.click()
+  fileInput.value?.click()
 }
 
-const handleFileSelect = (event) => {
-  const file = event.target.files[0]
+const handleFileSelect = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
   if (file) {
     processVideoFile(file)
   }
 }
 
-const dropFile = (event) => {
+const dropFile = (event: DragEvent) => {
   isDragOver.value = false
-  const file = event.dataTransfer.files[0]
+
+  const file = event.dataTransfer?.files[0]
   if (file) {
     processVideoFile(file)
   }
@@ -110,7 +119,6 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  // Clean up the event listener when the component is destroyed
   window.removeEventListener('scroll', handleScroll)
 })
 
@@ -170,8 +178,13 @@ const captureFrames = async () => {
   return promiseChain
 }
 
-const captureFrameAtTime = (video, timestamp, baseName, index) => {
-  return new Promise((resolve) => {
+const captureFrameAtTime = (
+  video: HTMLVideoElement,
+  timestamp: number,
+  baseName: string,
+  index: number,
+) => {
+  return new Promise<CapturedFrame | null>((resolve) => {
     const canvas = document.createElement('canvas')
     canvas.width = video.videoWidth
     canvas.height = video.videoHeight
@@ -183,7 +196,7 @@ const captureFrameAtTime = (video, timestamp, baseName, index) => {
 
       // 2. Draw the *new* frame now that it is ready
       try {
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+        ctx?.drawImage(video, 0, 0, canvas.width, canvas.height)
 
         const dataUrl = canvas.toDataURL('image/jpeg', 0.9)
         const timeStr = (timestamp * 1000).toFixed(0).padStart(7, '0')
@@ -280,7 +293,7 @@ const captureFrameAtTime = (video, timestamp, baseName, index) => {
 
         <input
           type="file"
-          ref="fileInput"
+          ref="file-input"
           @change="handleFileSelect"
           accept="video/*"
           style="display: none"
@@ -294,7 +307,7 @@ const captureFrameAtTime = (video, timestamp, baseName, index) => {
           @drop.prevent="dropFile"
         >
           <video
-            ref="videoPlayer"
+            ref="video-player"
             :src="videoUrl"
             controls
             class="video-player w-100 rounded shadow-sm"
