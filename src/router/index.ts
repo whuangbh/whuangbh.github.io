@@ -1,6 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-import VidFrameCapToolView from '../views/VidFrameCapToolView.vue'
-import HomeView from '../views/HomeView.vue'
+import VidFrameCapToolView from '@/views/VidFrameCapToolView.vue'
+import HomeView from '@/views/HomeView.vue'
 
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
